@@ -1,8 +1,7 @@
 import os
-from pathlib import Path
 import hashlib
 import requests
-import html
+import re
 
 from downloaded_data import DownloadedData
 
@@ -73,8 +72,10 @@ class FileSaver:
 
             # Add custom notes
             html_file.write("<div class=\"notes\">\n")
+
             if downloaded_data.custom_notes:
-                html_file.write(html.escape(str(downloaded_data.custom_notes)))
+                html_file.write(re.sub(r'\s+', '<br>', downloaded_data.custom_notes))
+
             html_file.write("</div>\n</div>\n")
             html_file.close()
 
