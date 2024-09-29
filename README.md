@@ -1,47 +1,42 @@
 # Civitai Catalog Creator
 
-Este proyecto es una aplicación PHP que permite descargar las páginas de información a partir de una lista de URLs de modelos de CivitAI.
+This project is a PHP application that allows downloading information pages from a list of URLs of CivitAI models.
 
-La aplicación crea archivos HTML para cada tipo de modelo, en la que agregará toda la información de esos modelos, y las imágenes.
+The application creates HTML files for each type of model, in which it adds all the information about those models and images. Additionally, it allows adding notes to each of the models, starting from personalized HTML files.
 
-Además, permite agregar notas a cada uno de los modelos, partiendo de archivos HTML personalizados.
+## Requirements
 
-## Requisitos
+- PHP 7.4 or higher
+- PHP cURL extension
 
-- PHP 7.4 o superior
-- Extensión `cURL` de PHP
+## Installation
 
-## Instalación
-
-Clona este repositorio en tu máquina local o descarga los archivos del proyecto.
-
-```bash
+Clone this repository on your local machine or download the project files.
+```
 git clone https://github.com/jfuentesa/civitai-catalog-creator.git
-cd civitai-catalog-creator
+cd civitai-catalog-creator/
 ```
+## Usage
 
-## Uso
-
-1. Prepara un archivo de texto que contenga una lista de URLs a procesar. Cada URL debe estar en una línea separada. Por ejemplo, `urls.txt`:
-
+1. Prepare a text file that contains a list of URLs to process. Each URL should be on a separate line. For example, `urls.txt`:
 ```
 https://...
-https://...
+https:// ...
 ```
 
-2. Ejecuta el programa desde la línea de comandos, proporcionando la ruta del archivo de URLs como argumento:
-
-```bash
-php src/civitai-catalog-creator.php urls.txt
+2. Run the program from the command line, providing the file and the destination folder as arguments:
+```
+php src/civitai-catalog-creator.php urls.txt downloads_folder
 ```
 
-- **Argumento**: La ruta al archivo de texto con las URLs.
-- El programa procesará cada URL, validará si ya ha sido descargada (consultando el archivo `processed`), y si no lo ha sido, descargará el contenido y lo guardará.
+- **Argument**: The path to the text file containing URLs.
+- The program will process each URL, validate whether it has already been downloaded (checking the `processed_ids` file), and if not, download the content and save it.
 
-## Archivo `processed_ids`
+## `processed_ids` File
 
-El archivo `processed_ids` contiene una lista de todas las ids que ya han sido procesadas. Si una id ya está en este archivo, el programa la omitirá y no realizará la descarga de datos, pero sí reescribirá los datos desde la caché HTML.
+The `processed_ids` file contains a list of all IDs that have already been processed. If an ID is already in this file, the program will skip it and not download any data. It analyzes either the URL or the web contents to know if it's necessary to download the data again.
 
-## Licencia
+## License
 
-Este proyecto está bajo la licencia MIT. Ver el archivo `LICENSE` para más detalles.
+This project is licensed under the MIT License. See the `LICENSE` file for more details.
+
