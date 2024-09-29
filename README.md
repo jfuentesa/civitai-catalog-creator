@@ -1,13 +1,12 @@
 # Civitai Catalog Creator
 
-This project is a PHP application that allows downloading information pages from a list of URLs of CivitAI models.
+This project is a Python application that allows downloading information pages from a list of URLs of CivitAI models.
 
 The application creates HTML files for each type of model, in which it adds all the information about those models and images. Additionally, it allows adding notes to each of the models, starting from personalized HTML files.
 
 ## Requirements
 
-- PHP 7.4 or higher
-- PHP cURL extension
+- Python 3.11 or higher
 
 ## Installation
 
@@ -26,7 +25,7 @@ https:// ...
 
 2. Run the program from the command line, providing the file and the destination folder as arguments:
 ```
-php src/civitai-catalog-creator.php urls.txt downloads_folder
+python src/civitai-catalog-creator.py urls.txt downloads_folder
 ```
 
 - **Argument**: The path to the text file containing URLs.
