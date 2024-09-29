@@ -28,12 +28,21 @@ https:// ...
 python src/civitai-catalog-creator.py urls.txt downloads_folder
 ```
 
-- **Argument**: The path to the text file containing URLs.
-- The program will process each URL, validate whether it has already been downloaded (checking the `processed_ids` file), and if not, download the content and save it.
+The program will process each URL, validate whether it has already been downloaded (checking the `processed_ids` file), and if not, download the content and save it in the specified folder.
 
-## `processed_ids` File
+## The `processed_ids` file
 
 The `processed_ids` file contains a list of all IDs that have already been processed. If an ID is already in this file, the program will skip it and not download any data. It analyzes either the URL or the web contents to know if it's necessary to download the data again.
+
+## Custom contents
+
+To add custom content, you can create a folder called `custom` within the root directory of the execution. Inside this folder, create HTML files with names that match the ID of the model whose content you want to include.
+
+For example, if you want to include the content of a model with ID `123`, create an HTML file named `custom/123.html`. The content of this file will be automatically included in the generated HTML for the corresponding model.
+
+## Demo
+
+In the `demo` folder, you'll find all the content produced by running the script with the `urls` file that includes the URLs.
 
 ## License
 
