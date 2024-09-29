@@ -42,7 +42,7 @@ if __name__ == "__main__":
                             
                             data = downloader.run(url)
                             saver.save(data)
-                            processed_manager.save_id(data.id, model_version_id)
+                            processed_manager.save_id(data.id)
                         except DataStructureException as e:
                             print("The data downloaded from this URL has an incorrect data structure: " + str(e))
                         except AlreadyProcessedException as e:
