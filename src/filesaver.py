@@ -54,7 +54,7 @@ class FileSaver:
 
             if downloaded_data.custom_notes:
                 html_file.write(f"<p><strong>Notes:</strong></p><p>\n")
-                html_file.write(re.sub(r'\s+', '<br>', downloaded_data.custom_notes))
+                html_file.write(re.sub(r'\n', '<br>', downloaded_data.custom_notes))
                 html_file.write(f"</p>\n")
 
             html_file.write("</div>\n")
