@@ -49,6 +49,16 @@ class FileSaver:
             if downloaded_data.clip_skip:
                 html_file.write(f"<p><strong>Clip Skip:</strong> {downloaded_data.clip_skip}</p>\n")
 
+            # Add custom notes
+            html_file.write("<div class=\"notes\">\n")
+
+            if downloaded_data.custom_notes:
+                html_file.write(f"<p><strong>Notes:</strong></p><p>\n")
+                html_file.write(re.sub(r'\s+', '<br>', downloaded_data.custom_notes))
+                html_file.write(f"</p>\n")
+
+            html_file.write("</div>\n")
+
             # Write links to images
             html_file.write("<p><strong>Images:</strong></p>\n")
             for index, image_url in enumerate(downloaded_data.images):
@@ -70,13 +80,8 @@ class FileSaver:
 
                 html_file.write(f"<img src='{img_src}' style='width: 200px; margin-right: 10px;' />\n")
 
-            # Add custom notes
-            html_file.write("<div class=\"notes\">\n")
 
-            if downloaded_data.custom_notes:
-                html_file.write(re.sub(r'\s+', '<br>', downloaded_data.custom_notes))
-
-            html_file.write("</div>\n</div>\n")
+            html_file.write("</div>\n")
             html_file.close()
 
         # Regerates the entire HTML file
