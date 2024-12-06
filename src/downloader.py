@@ -7,6 +7,7 @@ class DownloaderInterface:
 
 # Implementación del downloader usando requests
 class CurlDownloader(DownloaderInterface):
+
     def download(self, url: str) -> str:
         # Configura las opciones de request
         response = requests.get(url)

@@ -2,6 +2,9 @@ import re
 import json
 import os
 
+from urllib.parse import parse_qs
+from urllib.parse import urlparse
+
 from typing import List
 
 from Exception.AlreadyProcessedException import AlreadyProcessedException
@@ -21,30 +24,41 @@ class CivitaiDownloader:
         self.processed_manager = processed_manager
         self.model_version_index = 0
         self.images_url_base = "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/"
+        self.api_url_base = "https://civitai.com/api/v1"
 
+        self.queryid = 4
+
+    # TODO Pendiente aquí viene el ID
     def run(self, civitai_url: str) -> DownloadedData:
         config = Config()
 
         try:
+            # TODO START Pendiente eliminar
             sanitized_url = self.validator.sanitize(civitai_url)
             if not self.validator.validate(sanitized_url):
                 raise ValueError("URL not valid.")
+            # TODO END Pendiente eliminar
 
-            content = self.downloader.download(sanitized_url)
+            querystring = urlparse(sanitized_url).query
+            params = parse_qs(querystring)
+            
+            if not "modelVersionId" in params:
+                raise ValueError("Missing modelVersion.")
 
+            model_version_id = params["modelVersionId"][0]
+
+            # Download model data from API
+            content = self.downloader.download(self.api_url_base + "/model-versions/" + model_version_id)
             data = self.extract_json(content)
 
             # Debugging
             # with open("debug_data.txt", "w") as f:
             #     f.write(str(data))
 
-            self.validate_data_structure(data)
-
             model_id = self.extract_id(data)
             name = self.extract_name(data)
 
             print(f"Processing... {name} ({model_id})")
-
             if self.processed_manager.already_processed_id(model_id):
                 raise AlreadyProcessedException(f"{name} ({model_id})")
 
@@ -84,15 +98,11 @@ class CivitaiDownloader:
         return downloaded_data
 
     def extract_json(self, content: str) -> dict:
-        # Search for the JSON
-        match = re.search(r'<script id="__NEXT_DATA__" type="application\/json">\s*(\{.*?\})\s*<\/script>', content, re.S)
-        
-        if match:
-            json_data = json.loads(match.group(1))
-            if isinstance(json_data, dict):
-                return json_data
-            else:
-                raise ValueError("El JSON no es correcto.")
+        json_data = json.loads(content)
+        if isinstance(json_data, dict):
+            return json_data
+        else:
+            raise ValueError("El JSON no es correcto.")
         return {}
 
     def search_value(self, array: dict, search_value, path: str = '') -> str:
@@ -112,49 +122,42 @@ class CivitaiDownloader:
         return path if path else "No se encontró el valor"
 
     def extract_id(self, content: dict) -> int:
-        # If depends on the presence of modelVersionId in the content
-        if "query" in content and "modelVersionId" in content["query"]:
-            id = content["query"]["modelVersionId"]
-        else:
-            id = content["props"]["pageProps"]["trpcState"]["json"]["queries"][5]["state"]["data"]["modelVersions"][0]["id"]
-            
-        return int(id)
+        return int(content["id"])
 
     def extract_name(self, content: dict) -> str:
-        model_name = content["props"]["pageProps"]["trpcState"]["json"]["queries"][5]["state"]["data"]["name"]
-        model_version = "Unknown"
-        loaded_id = self.extract_id(content)
-
-        for index, version in enumerate(content["props"]["pageProps"]["trpcState"]["json"]["queries"][5]["state"]["data"]["modelVersions"]):
-
-            if version["id"] == loaded_id:
-                model_version = version["name"]
-                self.model_version_index = index
+        model_name = content["model"]["name"]
+        model_version = content["name"]
 
         return f"{model_name} - version: {model_version}"
 
     def extract_type(self, content: dict) -> str:
-        return content["props"]["pageProps"]["trpcState"]["json"]["queries"][5]["state"]["data"]["type"]
+        return content["model"]["type"]
 
     def extract_filename(self, content: dict) -> str:
-        return content["props"]["pageProps"]["trpcState"]["json"]["queries"][5]["state"]["data"]["modelVersions"][self.model_version_index]["files"][0]["name"]
+        return content["files"][0]["name"]
 
     def extract_base_model(self, content: dict) -> str:
-        return content["props"]["pageProps"]["trpcState"]["json"]["queries"][5]["state"]["data"]["modelVersions"][self.model_version_index]["baseModel"]
+        return content["baseModel"]
 
     def extract_clip_skip(self, content: dict) -> int:
-        clip_skip = content["props"]["pageProps"]["trpcState"]["json"]["queries"][5]["state"]["data"]["modelVersions"][self.model_version_index]["clipSkip"]
-        return int(clip_skip) if isinstance(clip_skip, int) else 0
+        clip_skip = 0
+        
+        if content["images"][0]["meta"] is not None:
+            if content["images"][0]["meta"].get("Clipskip") is not None:
+                clip_skip = content["images"][0]["meta"]["clipSkip"]
+            
+            if content["images"][0]["meta"].get("Clip skip") is not None:
+                clip_skip = content["images"][0]["meta"]["Clip skip"]
+
+        return int(clip_skip)
 
     def extract_trigger_words(self, content: dict) -> List[str]:
-        return content["props"]["pageProps"]["trpcState"]["json"]["queries"][5]["state"]["data"]["modelVersions"][self.model_version_index]["trainedWords"]
+        return content["trainedWords"]
 
     def extract_images(self, content: dict) -> List[str]:
+        
         images = []
-        for item in content["props"]["pageProps"]["trpcState"]["json"]["queries"][0]["state"]["data"]["pages"][0]["items"]:
-            images.append(f"{self.images_url_base}{item['url']}/width=450/{item['name']}")
+        for item in content["images"]:
+            images.append(item["url"])
+            
         return images
-
-    def validate_data_structure(self, data: dict):
-        if "props" not in data or "pageProps" not in data["props"]:
-            raise DataStructureException("Missing required data structure in input array")
